@@ -1,6 +1,9 @@
-// Simple centralized error handler
+  // Simple centralized error handler
 module.exports = (err, req, res, next) => {
-  console.error(err);
+  // Log full stack for easier debugging in dev
+  console.error(err.stack || err);
   const status = err.status || 500;
-  res.status(status).json({ error: err.message || 'Internal Server Error' });
+  const payload = { error: err.message || 'Internal Server Error' };
+  if (process.env.NODE_ENV !== 'production') payload.stack = err.stack;
+  res.status(status).json(payload);
 };

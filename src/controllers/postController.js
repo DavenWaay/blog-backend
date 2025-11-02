@@ -1,4 +1,5 @@
 const Post = require('../models/Post');
+const Comment = require('../models/Comment');
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -69,8 +70,10 @@ exports.deletePost = async (req, res, next) => {
       return res.status(403).json({ error: 'Forbidden: not the post author' });
     }
 
-    await post.remove();
-    res.json({ success: true });
+  // Delete associated comments first, then delete the post document.
+  await Comment.deleteMany({ post: post._id });
+  await Post.deleteOne({ _id: post._id });
+  res.json({ success: true });
   } catch (err) {
     next(err);
   }

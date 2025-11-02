@@ -26,15 +26,17 @@ exports.getCommentsForPost = async (req, res, next) => {
 exports.deleteComment = async (req, res, next) => {
   try {
     const commentId = req.params.commentId;
-    const comment = await Comment.findById(commentId).populate('post');
+    // populate post.author so we can verify post owner
+    const comment = await Comment.findById(commentId).populate({ path: 'post', populate: { path: 'author', select: '_id' } });
     if (!comment) return res.status(404).json({ error: 'Comment not found' });
 
     // Allow deletion by comment author or post owner
-    const isAuthor = req.user && comment.author.toString() === req.user._id.toString();
-    const isPostOwner = req.user && comment.post && comment.post.author && comment.post.author.toString() === req.user._id.toString();
+    const isAuthor = req.user && comment.author && comment.author.toString() === req.user._id.toString();
+    const isPostOwner = req.user && comment.post && comment.post.author && comment.post.author._id.toString() === req.user._id.toString();
     if (!isAuthor && !isPostOwner) return res.status(403).json({ error: 'Forbidden: cannot delete comment' });
 
-    await comment.remove();
+    // Use deleteOne to avoid model middleware side-effects and to be explicit
+    await Comment.deleteOne({ _id: commentId });
     res.json({ success: true });
   } catch (err) {
     next(err);
