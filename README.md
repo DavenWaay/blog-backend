@@ -118,12 +118,3 @@ Scripts:
 - build: tsc && vite build
 - preview: vite preview
 
----
-
-If you'd like, I can also:
-
-- Update the existing README files in each folder to point to this consolidated README, or
-- Add sample `.env` files with example values, or
-- Provide PowerShell scripts to run both backend and frontend together.
-
-Let me know which of those you'd like next.
